@@ -63,16 +63,14 @@ function loadItems() {
         items.forEach(item => {
             container.innerHTML += `
                 <div class="card">
-                    ${item.imageUrl ? `<img src="${item.imageUrl}" alt="${item.name}" style="width:100%; border-radius:10px; margin-bottom:10px;">` : ''}
-                    <div class="price">₦${item.price}</div>
-                    <h3>${item.name}</h3>
-                    <p>${item.description}</p>
-                    <p><small>Seller: ${item.seller}</small></p>
-                    <a href="https://wa.me/${item.phone || ''}?text=Hi, I'm interested in your ${item.name}" 
-                       target="_blank" 
-                       class="whatsapp-link">
-                       Chat with Seller
-                    </a>
+                    ${item.imageUrl ? `<img src="${item.imageUrl}" alt="${item.name}">` : ''}
+                    <div class="card-content">
+                <div class="price">₦${item.price}</div>
+                <h3>${item.name}</h3>
+                <p>${item.description}</p>
+                <a href="https://wa.me/${item.phone}?text=Interested in ${item.name}" 
+                   class="whatsapp-link">Chat on WhatsApp</a>
+            </div>
                 </div>
             `;
         });
