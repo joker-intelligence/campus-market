@@ -1,3 +1,4 @@
+	
 // Helper to get user from local storage
 const getCurrentUser = () => JSON.parse(localStorage.getItem('user'));
 
@@ -6,6 +7,7 @@ function register() {
     const username = document.getElementById('username').value;
     const phone = document.getElementById('phone').value;
     const password = document.getElementById('password').value;
+
 
     if(!username || !phone || !password) return alert("Please fill all fields");
 
