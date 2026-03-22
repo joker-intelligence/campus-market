@@ -158,3 +158,14 @@ h1 {
     transform: translateY(-1px);
 }
 
+
+/* Buttons */
+button, .btn-post {
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+    display: inline-block;
+    text-decoration: none;
+    text-align: center;
