@@ -115,3 +115,24 @@ input, textarea {
     font-weight: 600;
 }
 
+.top-bar {
+    background: var(--bg-card);
+    padding: 1rem 0;
+    border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.top-bar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin: 0;
+}
