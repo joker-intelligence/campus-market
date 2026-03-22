@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sell an Item | Campus Market</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-page">
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <a href="index.html" style="text-decoration: none; color: var(--text-muted); font-size: 0.9rem;">← Back to Market</a>
+            <h2 style="margin-top: 15px;">Post New Item</h2>
+            <p class="subtitle">Enter details to reach buyers on campus.</p>
+
+            <div class="input-group">
+                <label>Item Name</label>
+                <input type="text" id="itemName" placeholder="e.g. Calculus Textbook">
+            </div>
+
+            <div class="input-group">
+                <label>Price (₦)</label>
+                <input type="number" id="itemPrice" placeholder="e.g. 5000">
+            </div>
+
+            <div class="input-group">
+                <label>Description</label>
+                <textarea id="itemDesc" rows="4" placeholder="Condition, location on campus, etc." 
+                    style="width: 100%; border-radius: 10px; border: 1.5px solid #e2e8f0; padding: 12px; font-family: inherit; box-sizing: border-box;"></textarea>
+            </div>
+
+            <button onclick="postItem()" class="btn-primary">List Item Now</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Security: Don't let unlogged users even see this form
+        if (!localStorage.getItem('user')) window.location = "login.html";
+    </script>
+</body>
+</html>

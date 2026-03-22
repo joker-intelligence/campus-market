@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join the Market | Campus Market</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-page">
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <h2>Create Account</h2>
+            <p class="subtitle">Join your campus community today.</p>
+
+            <div class="input-group">
+                <label>Full Name / Username</label>
+                <input type="text" id="username" placeholder="e.g. John Doe">
+            </div>
+
+            <div class="input-group">
+                <label>Phone Number (WhatsApp)</label>
+                <input type="tel" id="phone" placeholder="e.g. 08012345678">
+            </div>
+
+            <div class="input-group">
+                <label>Create Password</label>
+                <input type="password" id="password" placeholder="Minimum 6 characters">
+            </div>
+
+            <button onclick="register()" class="btn-primary">Register Now</button>
+
+            <p class="auth-footer">
+                Already a member? <a href="login.html">Login here</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
