@@ -2,89 +2,88 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
+const multer = require('multer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middlewares
+// 1. Setup Folders & Middlewares
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public')); // Serves your HTML/CSS/JS automatically
+app.use(express.static('public'));
 
-// File Paths
-const USERS_FILE = path.join(__dirname, 'data', 'users.json');
-const ITEMS_FILE = path.join(__dirname, 'data', 'items.json');
+const DATA_DIR = path.join(__dirname, 'data');
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const POSTS_FILE = path.join(DATA_DIR, 'posts.json');
+const UPLOADS_DIR = path.join(__dirname, 'public', 'uploads');
 
-// --- HELPER FUNCTIONS ---
-// Ensures the app doesn't crash if files are missing
-const initFiles = () => {
-    if (!fs.existsSync(path.join(__dirname, 'data'))) {
-        fs.mkdirSync(path.join(__dirname, 'data'));
+
+
+// Ensure folders exist
+[DATA_DIR, UPLOADS_DIR].forEach(dir => {
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+});
+if (!fs.existsSync(USERS_FILE)) fs.writeFileSync(USERS_FILE, '[]');
+if (!fs.existsSync(POSTS_FILE)) fs.writeFileSync(POSTS_FILE, '[]');
+
+// 2. Image Upload Configuration
+const storage = multer.diskStorage({
+    destination: UPLOADS_DIR,
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + '-' + file.originalname);
     }
-    if (!fs.existsSync(USERS_FILE)) fs.writeFileSync(USERS_FILE, '[]');
-    if (!fs.existsSync(ITEMS_FILE)) fs.writeFileSync(ITEMS_FILE, '[]');
-};
-initFiles();
+});
+const upload = multer({ storage: storage });
 
+// 3. Helper Functions
 const getData = (file) => JSON.parse(fs.readFileSync(file, 'utf8'));
 const saveData = (file, data) => fs.writeFileSync(file, JSON.stringify(data, null, 2));
 
 // --- ROUTES ---
 
-// 1. GET ALL ITEMS
-app.get('/items', (req, res) => {
-    try {
-        const items = getData(ITEMS_FILE);
-        res.json(items);
-    } catch (error) {
-        res.status(500).json({ error: "Could not load items" });
-    }
+// Get All Posts (for the Market page)
+app.get('/posts', (req, res) => {
+    res.json(getData(POSTS_FILE));
 });
 
-// 2. REGISTER USER
+// Register
 app.post('/register', (req, res) => {
     const { username, phone, password } = req.body;
     let users = getData(USERS_FILE);
-
-    if (users.find(u => u.phone === phone)) {
-        return res.json({ success: false, message: "User already exists!" });
-    }
-
+    if (users.find(u => u.phone === phone)) return res.json({ success: false, message: "User exists!" });
     users.push({ username, phone, password });
     saveData(USERS_FILE, users);
     res.json({ success: true });
 });
 
-// 3. LOGIN USER
+// Login
 app.post('/login', (req, res) => {
     const { phone, password } = req.body;
-    const users = getData(USERS_FILE);
-    const user = users.find(u => u.phone === phone && u.password === password);
-
-    if (user) {
-        res.json({ success: true, user: { username: user.username, phone: user.phone } });
-    } else {
-        res.json({ success: false, message: "Invalid credentials" });
-    }
+    const user = getData(USERS_FILE).find(u => u.phone === phone && u.password === password);
+    if (user) res.json({ success: true, user: { username: user.username, phone: user.phone } });
+    else res.json({ success: false });
 });
 
-// 4. ADD ITEM
-app.post('/add-item', (req, res) => {
+// Add Item with Image
+app.post('/posts', upload.single('image'), (req, res) => {
     try {
-        const newItem = req.body;
-        let items = getData(ITEMS_FILE);
-        
-        // Add to the beginning of the list (newest first)
-        items.unshift(newItem); 
-        
-        saveData(ITEMS_FILE, items);
-        res.json({ success: true });
+        const posts = getData(POSTS_FILE);
+        const newPost = {
+            name: req.body.name,
+            price: req.body.price,
+            description: req.body.description,
+            seller: req.body.seller,
+            phone: req.body.phone,
+            imageUrl: `/uploads/${req.file.filename}`,
+            date: new Date().toLocaleString()
+        };
+        posts.unshift(newPost); // Newest first
+        saveData(POSTS_FILE, posts);
+        res.status(201).json({ success: true });
     } catch (error) {
         res.status(500).json({ success: false });
     }
 });
 
-// Start Server
-app.listen(PORT, () => {
-    console.log(`🚀 Server is flying at http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Server flying at port ${PORT}`));
+

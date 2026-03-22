@@ -22,8 +22,7 @@ function register() {
         } else {
             alert(data.message || "Registration failed");
         }
-    })
-    .catch(err => console.error("Error:", err));
+    });
 }
 
 // --- LOGIN ---
@@ -47,13 +46,14 @@ function login() {
     });
 }
 
-// --- LOAD ITEMS (The Magnificent Version) ---
+// --- LOAD ITEMS (Now with Image Support) ---
 function loadItems() {
-    fetch('/items')
+    fetch('/posts') // Changed from /items to /posts to match your server
     .then(res => res.json())
     .then(items => {
         const container = document.getElementById('items');
-        container.innerHTML = ""; // Clear loading message
+        if(!container) return; 
+        container.innerHTML = ""; 
 
         if (items.length === 0) {
             container.innerHTML = "<p>No items for sale yet. Be the first!</p>";
@@ -63,10 +63,12 @@ function loadItems() {
         items.forEach(item => {
             container.innerHTML += `
                 <div class="card">
+                    ${item.imageUrl ? `<img src="${item.imageUrl}" alt="${item.name}" style="width:100%; border-radius:10px; margin-bottom:10px;">` : ''}
                     <div class="price">₦${item.price}</div>
                     <h3>${item.name}</h3>
                     <p>${item.description}</p>
-                    <a href="https://wa.me/${item.phone}?text=Hi, I'm interested in your ${item.name}" 
+                    <p><small>Seller: ${item.seller}</small></p>
+                    <a href="https://wa.me/${item.phone || ''}?text=Hi, I'm interested in your ${item.name}" 
                        target="_blank" 
                        class="whatsapp-link">
                        Chat with Seller
@@ -77,46 +79,50 @@ function loadItems() {
     });
 }
 
+// --- POST ITEM (The Async Image Version) ---
+async function postItem() {
+    const name = document.getElementById('itemName').value;
+    const price = document.getElementById('itemPrice').value;
+    const desc = document.getElementById('itemDesc').value;
+    const imageInput = document.getElementById('itemImage'); 
+    const imageFile = imageInput.files[0];
+
+    const user = getCurrentUser();
+    if (!user) return window.location = "login.html";
+
+    if (!name || !price || !imageFile) {
+        alert("Please fill in the Name, Price, and select a Photo!");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('price', price);
+    formData.append('description', desc);
+    formData.append('image', imageFile); 
+    formData.append('seller', user.username);
+    formData.append('phone', user.phone); // Adding phone so WhatsApp works!
+
+    try {
+        const response = await fetch('/posts', {
+            method: 'POST',
+            body: formData 
+        });
+
+        if (response.ok) {
+            alert("Success! Item is now live.");
+            window.location.href = "index.html";
+        } else {
+            alert("Upload failed. Check your connection.");
+        }
+    } catch (err) {
+        console.error("Connection error:", err);
+    }
+}
+
 // --- LOGOUT ---
 function logout() {
     localStorage.removeItem('user');
     window.location = "login.html";
-}
-
-// --- POST ITEM ---
-function postItem() {
-    const name = document.getElementById('itemName').value;
-    const price = document.getElementById('itemPrice').value;
-    const description = document.getElementById('itemDesc').value;
-    
-    // Get logged-in user details
-    const user = JSON.parse(localStorage.getItem('user'));
-
-    if (!name || !price || !description) {
-        return alert("Please fill in all fields!");
-    }
-
-    const newItem = {
-        name,
-        price,
-        description,
-        phone: user.phone, // Automatically link the post to the seller
-        seller: user.username,
-        date: new Date().toLocaleDateString()
-    };
-
-    fetch('/add-item', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newItem)
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            alert("Success! Your item is now live.");
-            window.location = "index.html";
-        }
-    })
-    .catch(err => alert("Error posting item. Check your connection."));
 }
 
